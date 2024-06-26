@@ -1,0 +1,47 @@
+// server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.json());
+
+app.post('/register', async (req, res) => {
+    const { email, password } = req.body;
+
+    // Here you would typically save the user data to a database
+    // For simplicity, we'll skip that step
+
+    // Create a transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+        service: 'Gmail', // You can use other services like 'Yahoo', 'Outlook', etc.
+        auth: {
+            user: 'your-email@gmail.com', // Your email
+            pass: 'your-email-password'  // Your email password
+        }
+    });
+
+    // Setup email data
+    let mailOptions = {
+        from: '"Your App" <your-email@gmail.com>', // Sender address
+        to: email, // List of receivers
+        subject: 'Registration Successful', // Subject line
+        text: 'You have successfully registered!', // Plain text body
+        html: '<b>You have successfully registered!</b>' // HTML body
+    };
+
+    try {
+        // Send mail with defined transport object
+        await transporter.sendMail(mailOptions);
+        res.status(200).send('Registration successful');
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Error registering user');
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+});
